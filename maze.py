@@ -1,34 +1,42 @@
-from typing import Tuple
+from typing import Iterable, Tuple
 import pygame
 from queue import PriorityQueue
-
+import interactions
 # --- Global constants ---
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 700
 
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 255, 0)
-YELLOW = (255, 255, 0)
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-PURPLE = (128, 0, 128)
-ORANGE = (255, 165, 0)
-GREY = (128, 128, 128)
-TURQUOISE = (64, 224, 208)
+class COLOR:
+    RED = (255, 0, 0)
+    GREEN = (0, 255, 0)
+    BLUE = (0, 255, 0)
+    YELLOW = (255, 255, 0)
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    PURPLE = (128, 0, 128)
+    ORANGE = (255, 165, 0)
+    GREY = (128, 128, 128)
+    TURQUOISE = (64, 224, 208)
 
 # --- Classes ---
 
+class Spot:
+    """
+    A class object representing the Spot.
 
-class Spot():
-    """ This class represents the spot. """
-    def __init__(self, row, col, width, total_rows):
+    :ivar int row: Row position of the Spot in the Grid.
+    :ivar int col: Column position of the Spot in the Grid.
+    :ivar int width: The width number of the pixel (from the window).
+    :ivar int total_rows: The total number of rows in the Grid.
+    """
+
+    def __init__(self, row_pos: int, col_pos: int, width: int, total_rows: int):
         super().__init__()
-        self.row = row
-        self.col = col
-        self.x = row * width
-        self.y = col * width
-        self.color = WHITE
+        self.row = row_pos
+        self.col = col_pos
+        self.x = row_pos * width
+        self.y = col_pos * width
+        self.color = COLOR.WHITE
         self.neighbors = []
         self.width = width
         self.total_rows = total_rows
@@ -37,57 +45,63 @@ class Spot():
         return self.row, self.col
 
     def is_closed(self):
-        return self.color == RED
+        return self.color == COLOR.RED
 
     def is_open(self):
-        return self.color == GREEN
+        return self.color == COLOR.GREEN
 
     def is_barrier(self):
-        return self.color == BLACK
+        return self.color == COLOR.BLACK
 
     def is_start(self):
-        return self.color == ORANGE
+        return self.color == COLOR.ORANGE
 
     def is_end(self):
-        return self.color == TURQUOISE
+        return self.color == COLOR.TURQUOISE
 
     def reset(self):
-        self.color = WHITE
+        self.color = COLOR.WHITE
 
     def make_start(self):
-        self.color = ORANGE
+        self.color = COLOR.ORANGE
 
     def make_closed(self):
-        self.color = RED
+        self.color = COLOR.RED
 
     def make_open(self):
-        self.color = GREEN
+        self.color = COLOR.GREEN
 
     def make_barrier(self):
-        self.color = BLACK
+        self.color = COLOR.BLACK
 
     def make_end(self):
-        self.color = TURQUOISE
+        self.color = COLOR.TURQUOISE
 
     def make_path(self):
-        self.color = PURPLE
+        self.color = COLOR.PURPLE
 
-    def draw(self, window):
+    def draw(self, window: pygame.Surface):
         pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.width))
 
-    def update_neighbors(self, grid):
+    def update_neighbors(self, grid: Iterable[Iterable[int]]):
+        """ Updates Spot neighbors (up, down, right, left). """
+    
         self.neighbors = []
 
-        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier(): # DOWN
+        # LOWER NEIGHBOR SPOT
+        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier():
             self.neighbors.append(grid[self.row + 1][self.col])
 
-        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier(): # UP
+        # UPPER NEIGHBOR SPOT
+        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier():
             self.neighbors.append(grid[self.row - 1][self.col])
 
-        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier(): # RIGHT
+        # RIGHT NEIGHBOR SPOT
+        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier():
             self.neighbors.append(grid[self.row][self.col + 1])
 
-        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier(): # LEFT
+        # LEFT NEIGHBOR SPOT
+        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier():
             self.neighbors.append(grid[self.row][self.col - 1])
     # TODO : wtf is this older me ? new me fix it pls  
     """
@@ -117,53 +131,104 @@ class Spot():
     def __lt__(self, other):
         return False
 
-class Grid():
-    """ This class represents the grid. """
+class Grid:
+    """
+    A class object representing the Grid.
 
-    def __init__(self, window, rows, width):
+    :ivar pygame.Surface window: The pygame.Surface instance used as the window.
+    :ivar int rows: The rows number of the Grid.
+    :ivar int width: The width number of the pixel (from the window).
+    """
+
+    def __init__(self, window: pygame.Surface, rows: int, width: int):
         self.window = window
         self.rows = rows
         self.width = width
         self.Grid = self.make_grid(self.rows, self.width)
 
-    def make_grid(self, rows, width):
+    def make_grid(self, rows: int, width: int) -> Iterable[Iterable[int]]:
+        """
+            Returns a grid list according to rows and width.
+
+            :param rows: Number of rows.
+            :type  rows: int
+            :param width: Width number of pixel.
+            :type  width: int
+        """
         grid = []
         gap = width // rows
         for i in range(rows):
             grid.append([])
             for j in range(rows):
-                spot = Spot(row=i, col=j, width=gap, total_rows=rows)
+                spot = Spot(row_pos=i, col_pos=j, width=gap, total_rows=rows)
                 grid[i].append(spot)
 
         return grid
 
-    def draw_grid(self, window, rows, width):
-        gap = width // rows
-        for i in range(rows):
-            pygame.draw.line(window, GREY, (0, i * gap), (width, i * gap))
-            for j in range(rows):
-                pygame.draw.line(window, GREY, (j * gap, 0), (j * gap, width))
+    def get_spot(self, row: int, col: int) -> Spot:
+        """
+            Returns grid's row and column position from pixel position.
 
-    def get_spot(self, row, col):
+            :param row: Row spot position in the grid.
+            :type  row: int
+            :param col: Col spot position in the grid.
+            :type  col: int
+        """
         return self.Grid[row][col]
 
-    def get_all_spot(self):
+    def get_all_spot(self) -> Iterable[Spot]:
+        """ Returns all grid's spot. """
         all_spot = []
         for row in self.Grid:
             for spot in row:
                 all_spot.append(spot)
         return all_spot
 
+    def pos_to_grid(self, pos: Tuple[int, int]) -> Tuple[int, int]:
+        """
+            Returns grid's row and column position from pixel position.
+
+            :param pos: Position of the pixel.
+            :type  pos: Tuple[int, int]
+        """
+        gap = self.width // self.rows # column // rows
+        y, x = pos
+
+        row = y // gap
+        col = x // gap
+
+        return row, col
+
+    def get_spot_from_pos(self, pos: Tuple[int, int]) -> Spot:
+        """
+            Returns grid's row and column numbers from pixel position.
+
+            :param pos: Position of the pixel.
+            :type  pos: Tuple[int, int]
+        """
+        # getting (row, col) coordinates from pos.
+        row, col = self.pos_to_grid(pos)
+        # returning spot from the grid row & col pos.
+        return self.get_spot(row, col)
+
+    def draw_grid(self):
+        """ Draws the grid. """
+        gap = self.width // self.rows
+        for i in range(self.rows):
+            pygame.draw.line(self.window, COLOR.GREY, (0, i * gap), (self.width, i * gap))
+            for j in range(self.rows):
+                pygame.draw.line(self.window, COLOR.GREY, (j * gap, 0), (j * gap, self.width))
+
     def update(self):
-        """ Update the grid. """
+        """ Updates the grid. """
         # draw all spots
         for row in self.Grid:
             for spot in row:
                 spot.draw(self.window)
         # draw whole grid
-        self.draw_grid(self.window, self.rows, self.width)
+        self.draw_grid()
 
-class Algorithms():
+class Algorithms:
     """ This class represents a bunch of algorithms. """
 
     @staticmethod
@@ -179,7 +244,8 @@ class Algorithms():
             current.make_path()
 
     @staticmethod
-    def A_star(grid, start, end):
+    def A_star(screen, grid_obj, start, end):
+        grid = grid_obj.Grid
         count = 0
         open_set = PriorityQueue()
         open_set.put((0, count, start))
@@ -219,20 +285,27 @@ class Algorithms():
 
             if current != start:
                 current.make_closed()
+            
+            screen.fill(COLOR.WHITE)
+            grid_obj.update()
+            pygame.display.update()
 
         return False
 
-class Interface():
+class Interface:
     """
-        This class represents an instance of the interface. 
-        If we need to reset the interface ame we'd just need to create a new instance of this class.
+    A class object representing the Spot.
+
+    :ivar pygame.Surface window: The pygame.Surface instance used as the window.
+    :ivar int height: The window height.
+    :ivar int width: The window width.
     """
 
-    def __init__(self, window, screen_size):
+    def __init__(self, window: pygame.Surface, height: int, width: int):
         self.WINDOW = window
 
-        self.GRID_WIDTH = screen_size[0]
-        self.GRID_HEIGHT = screen_size[1]
+        self.GRID_HEIGHT = height
+        self.GRID_WIDTH = width
 
         self.GRID_ROWS = 20
 
@@ -240,38 +313,10 @@ class Interface():
         self.start = None
         self.end   = None
 
-    def pos_to_grid(self, pos, rows, column):
-        """
-            Return grid's row and column numbers from pixel position.
-
-            :param pos: Position of the pixel.
-            :type pos: Tuple[int, int]
-            :param rows: Grid's number of row.
-            :type rows: int
-            :param column: Grid's number of column.
-            :type column: int
-        """
-        gap = column // rows
-        y, x = pos
-
-        row = y // gap
-        col = x // gap
-
-        return row, col
-
-    def get_spot_from_mouse_pos(self) -> Spot:
-        # getting mouse pos.
-        pos: Tuple[int, int] = pygame.mouse.get_pos()
-        # getting (x, y) = (row, col) coordinates.
-        row, col = self.pos_to_grid(pos, self.GRID_ROWS, self.GRID_WIDTH)
-        # getting spot object from the window grid.
-        spot = self.grid.get_spot(row, col)
-        return spot
-
     def process_events(self):
         """ 
             Process all pygame events. 
-            Return "False" if we need to close the window.
+            Returns "False" if we need to close the window.
         """
 
         for event in pygame.event.get():
@@ -280,7 +325,8 @@ class Interface():
 
             # LEFT MOUSE BUTTON (LMB)  -> set spot
             if pygame.mouse.get_pressed()[0]:
-                spot: Spot = self.get_spot_from_mouse_pos()
+                pos: Tuple[int, int] = pygame.mouse.get_pos()
+                spot: Spot = self.grid.get_spot_from_pos(pos=pos)
 
                 # checking if "start" already exists AND if spot from (row, col) is not the "end".
                 if not self.start and spot != self.end:
@@ -298,7 +344,8 @@ class Interface():
 
             # RIGHT MOUSE BUTTON (RMB) -> reset spot
             elif pygame.mouse.get_pressed()[2]:
-                spot: Spot = self.get_spot_from_mouse_pos()
+                pos: Tuple[int, int] = pygame.mouse.get_pos()
+                spot: Spot = self.grid.get_spot_from_pos(pos=pos)
 
                 spot.reset()
                 if spot == self.start:
@@ -312,7 +359,7 @@ class Interface():
                     for spot in self.grid.get_all_spot():
                         spot.update_neighbors(self.grid.Grid) # TODO change this fcking pls dad
 
-                    Algorithms.A_star(grid=self.grid.Grid, start=self.start, end=self.end)
+                    Algorithms.A_star(screen=self.WINDOW, grid_obj=self.grid, start=self.start, end=self.end)
 
                 # C KEY DOWN  -> reset the grid
                 if event.key == pygame.K_c:
@@ -323,8 +370,8 @@ class Interface():
         return True
 
     def display_frame(self, screen):
-        """ Display everything to the screen. """
-        screen.fill(WHITE)
+        """ Displays everything to the screen. """
+        screen.fill(COLOR.WHITE)
         self.grid.update()
         pygame.display.update()
 
@@ -332,8 +379,7 @@ def main():
     # Initialize Pygame and set up the window
     pygame.init()
 
-    size = [SCREEN_WIDTH, SCREEN_HEIGHT]
-    screen = pygame.display.set_mode(size)
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
     pygame.display.set_caption("Testing algorithm for class project.")
 
@@ -343,7 +389,7 @@ def main():
     clock = pygame.time.Clock()
 
     # Create an instance of the Window class
-    interface = Interface(window=screen, screen_size=size)
+    interface = Interface(window=screen, height=SCREEN_HEIGHT, width=SCREEN_WIDTH)
 
     # Main game loop
     while run:
@@ -359,7 +405,6 @@ def main():
 
     # Close window and exit
     pygame.quit()
-
 
 # Call the main function, start up the window
 if __name__ == "__main__":
