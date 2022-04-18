@@ -5,7 +5,7 @@ from queue import PriorityQueue
 from app.colors import COLORS
 
 class Algorithms:
-    """ This class represents a bunch of algorithms. """
+    """ This class has a bunch of algorithms. """
 
     @staticmethod
     def h(p1, p2):
@@ -34,10 +34,6 @@ class Algorithms:
         open_set_hash = {start}
 
         while not open_set.empty():
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-
             current = open_set.get()[2]
             open_set_hash.remove(current)
 

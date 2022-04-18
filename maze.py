@@ -301,14 +301,14 @@ class Interface:
         pygame.display.update()
 
 def main():
-    # Initialize Pygame and set up the window
+    # Initialize Pygame.
     pygame.init()
 
+    # Set up the window.
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
     pygame.display.set_caption("Testing algorithm for class project.")
 
-    # Create our objects and set the data
+    # Create our objects and set the datas.
     run = True
     fps = 60
     clock = pygame.time.Clock()
@@ -331,6 +331,5 @@ def main():
     # Close window and exit
     pygame.quit()
 
-# Call the main function, start up the window
 if __name__ == "__main__":
     main()
