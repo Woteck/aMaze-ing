@@ -1,22 +1,11 @@
-from typing import Iterable, Tuple
 import pygame
-from queue import PriorityQueue
-import interactions
+from app.colors import COLORS
+from app.algorithms import Algorithms
+from typing import Iterable, Tuple
+
 # --- Global constants ---
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 700
-
-class COLOR:
-    RED = (255, 0, 0)
-    GREEN = (0, 255, 0)
-    BLUE = (0, 255, 0)
-    YELLOW = (255, 255, 0)
-    WHITE = (255, 255, 255)
-    BLACK = (0, 0, 0)
-    PURPLE = (128, 0, 128)
-    ORANGE = (255, 165, 0)
-    GREY = (128, 128, 128)
-    TURQUOISE = (64, 224, 208)
 
 # --- Classes ---
 
@@ -36,7 +25,7 @@ class Spot:
         self.col = col_pos
         self.x = row_pos * width
         self.y = col_pos * width
-        self.color = COLOR.WHITE
+        self.color = COLORS.WHITE
         self.neighbors = []
         self.width = width
         self.total_rows = total_rows
@@ -45,40 +34,40 @@ class Spot:
         return self.row, self.col
 
     def is_closed(self):
-        return self.color == COLOR.RED
+        return self.color == COLORS.RED
 
     def is_open(self):
-        return self.color == COLOR.GREEN
+        return self.color == COLORS.GREEN
 
     def is_barrier(self):
-        return self.color == COLOR.BLACK
+        return self.color == COLORS.BLACK
 
     def is_start(self):
-        return self.color == COLOR.ORANGE
+        return self.color == COLORS.ORANGE
 
     def is_end(self):
-        return self.color == COLOR.TURQUOISE
+        return self.color == COLORS.TURQUOISE
 
     def reset(self):
-        self.color = COLOR.WHITE
+        self.color = COLORS.WHITE
 
     def make_start(self):
-        self.color = COLOR.ORANGE
+        self.color = COLORS.ORANGE
 
     def make_closed(self):
-        self.color = COLOR.RED
+        self.color = COLORS.RED
 
     def make_open(self):
-        self.color = COLOR.GREEN
+        self.color = COLORS.GREEN
 
     def make_barrier(self):
-        self.color = COLOR.BLACK
+        self.color = COLORS.BLACK
 
     def make_end(self):
-        self.color = COLOR.TURQUOISE
+        self.color = COLORS.TURQUOISE
 
     def make_path(self):
-        self.color = COLOR.PURPLE
+        self.color = COLORS.PURPLE
 
     def draw(self, window: pygame.Surface):
         pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.width))
@@ -215,9 +204,9 @@ class Grid:
         """ Draws the grid. """
         gap = self.width // self.rows
         for i in range(self.rows):
-            pygame.draw.line(self.window, COLOR.GREY, (0, i * gap), (self.width, i * gap))
+            pygame.draw.line(self.window, COLORS.GREY, (0, i * gap), (self.width, i * gap))
             for j in range(self.rows):
-                pygame.draw.line(self.window, COLOR.GREY, (j * gap, 0), (j * gap, self.width))
+                pygame.draw.line(self.window, COLORS.GREY, (j * gap, 0), (j * gap, self.width))
 
     def update(self):
         """ Updates the grid. """
@@ -227,70 +216,6 @@ class Grid:
                 spot.draw(self.window)
         # draw whole grid
         self.draw_grid()
-
-class Algorithms:
-    """ This class represents a bunch of algorithms. """
-
-    @staticmethod
-    def h(p1, p2):
-        x1, y1 = p1
-        x2, y2 = p2
-        return abs(x1 - x2) + abs(y1 - y2)
-
-    @staticmethod
-    def reconstruct_path(came_from, current):
-        while current in came_from:
-            current = came_from[current]
-            current.make_path()
-
-    @staticmethod
-    def A_star(screen, grid_obj, start, end):
-        grid = grid_obj.Grid
-        count = 0
-        open_set = PriorityQueue()
-        open_set.put((0, count, start))
-        came_from = {}
-        g_score = {spot: float("inf") for row in grid for spot in row}
-        g_score[start] = 0
-        f_score = {spot: float("inf") for row in grid for spot in row}
-        f_score[start] = Algorithms.h(start.get_pos(), end.get_pos())
-
-        open_set_hash = {start}
-
-        while not open_set.empty():
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-
-            current = open_set.get()[2]
-            open_set_hash.remove(current)
-
-            if current == end:
-                Algorithms.reconstruct_path(came_from, end)
-                end.make_end()
-                return True
-
-            for neighbor in current.neighbors:
-                temp_g_score = g_score[current] + 1
-
-                if temp_g_score < g_score[neighbor]:
-                    came_from[neighbor] = current
-                    g_score[neighbor] = temp_g_score
-                    f_score[neighbor] = temp_g_score + Algorithms.h(neighbor.get_pos(), end.get_pos())
-                    if neighbor not in open_set_hash:
-                        count += 1
-                        open_set.put((f_score[neighbor], count, neighbor))
-                        open_set_hash.add(neighbor)
-                        neighbor.make_open()
-
-            if current != start:
-                current.make_closed()
-            
-            screen.fill(COLOR.WHITE)
-            grid_obj.update()
-            pygame.display.update()
-
-        return False
 
 class Interface:
     """
@@ -371,7 +296,7 @@ class Interface:
 
     def display_frame(self, screen):
         """ Displays everything to the screen. """
-        screen.fill(COLOR.WHITE)
+        screen.fill(COLORS.WHITE)
         self.grid.update()
         pygame.display.update()
 
