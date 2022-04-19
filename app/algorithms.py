@@ -20,7 +20,7 @@ class Algorithms:
             current.make_path()
 
     @staticmethod
-    def A_star(screen, grid_obj, start, end):
+    def A_star(grid_obj, start, end, visualize=False, screen=None):
         grid = grid_obj.Grid
         count = 0
         open_set = PriorityQueue()
@@ -58,8 +58,9 @@ class Algorithms:
             if current != start:
                 current.make_closed()
             
-            #screen.fill(COLORS.WHITE)
-            #grid_obj.update()
-            #pygame.display.update()
+            if visualize:
+                screen.fill(COLORS.WHITE)
+                grid_obj.update()
+                pygame.display.update()
 
         return False

@@ -1,4 +1,6 @@
+from tkinter.tix import WINDOW
 import pygame
+from sympy import true
 from app.colors import COLORS
 from app.algorithms import Algorithms
 from app.maze_generator import MAZE_GENERATOR
@@ -21,7 +23,6 @@ class Spot:
     """
 
     def __init__(self, row_pos: int, col_pos: int, width: int, total_rows: int):
-        super().__init__()
         self.row = row_pos
         self.col = col_pos
         self.x = row_pos * width
@@ -74,7 +75,7 @@ class Spot:
         pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.width))
 
     def update_neighbors(self, grid: Iterable[Iterable[int]]):
-        """ Updates Spot neighbors (up, down, right, left). """
+        """ Updates Spot neighbors and puts them in the list (up, down, right, left). """
     
         self.neighbors = []
 
@@ -93,31 +94,7 @@ class Spot:
         # LEFT NEIGHBOR SPOT
         if self.col > 0 and not grid[self.row][self.col - 1].is_barrier():
             self.neighbors.append(grid[self.row][self.col - 1])
-    # TODO : wtf is this older me ? new me fix it pls  
-    """
-    def update_neighbors(self, grid):
-        self.neighbors = []
 
-        # DOWN
-        lower_spot = grid.get_spot(self.row + 1, self.col)
-        if self.row < self.total_rows - 1 and not lower_spot.is_barrier():
-            self.neighbors.append(lower_spot)
-        
-        # UP
-        upper_spot = grid.get_spot(self.row - 1, self.col)
-        if self.row > 0 and not upper_spot.is_barrier():
-            self.neighbors.append(upper_spot)
-
-        # RIGHT
-        right_spot = grid.get_spot(self.row, self.col + 1)
-        if self.col < self.total_rows - 1 and not right_spot.is_barrier():
-            self.neighbors.append(right_spot)
-        
-        # LEFT
-        left_spot = grid.get_spot(self.row, self.col - 1)
-        if self.col > 0 and not left_spot.is_barrier():
-            self.neighbors.append(left_spot)
-    """
     def __lt__(self, other):
         return False
 
@@ -142,7 +119,7 @@ class Grid:
         else:
             self.Grid = self.make_grid(self.rows, self.width)
 
-    def make_grid(self, rows: int, width: int) -> Iterable[Iterable[int]]:
+    def make_grid(self, rows: int, width: int) -> Iterable[Iterable[Spot]]:
         """
             Returns a grid list according to rows and width.
 
@@ -161,7 +138,7 @@ class Grid:
 
         return grid
 
-    def make_random_grid(self, rows: int, width: int) -> Iterable[Iterable[int]]:
+    def make_random_grid(self, rows: int, width: int) -> Iterable[Iterable[Spot]]:
         """
             Returns a random maze as grid list according to rows and width.
 
@@ -230,6 +207,9 @@ class Grid:
         # returning spot from the grid row & col pos.
         return self.get_spot(row, col)
 
+    def get_grid(self) -> Iterable[Iterable[Spot]]:
+        return self.Grid
+
     def draw_grid(self):
         """ Draws the grid. """
         gap = self.width // self.rows
@@ -265,9 +245,9 @@ class Interface:
         self.GRID_ROWS = 100
 
         self.grid = Grid(window=self.WINDOW, rows=self.GRID_ROWS, width=self.GRID_WIDTH, random_maze=True)
-        self.start = self.grid.Grid[0][1]
+        self.start = self.grid.get_grid()[0][1]
         self.start.make_start()
-        self.end   = self.grid.Grid[-1][-2]
+        self.end   = self.grid.get_grid()[-1][-2]
         self.end.make_end()
 
     def process_events(self):
@@ -314,16 +294,23 @@ class Interface:
                 # SPACE KEY DOWN  -> apply A* path finding algorithm
                 if event.key == pygame.K_SPACE and self.start and self.end:
                     for spot in self.grid.get_all_spot():
-                        spot.update_neighbors(self.grid.Grid) # TODO change this fcking pls dad
+                        spot.update_neighbors(self.grid.get_grid())
 
-                    Algorithms.A_star(screen=self.WINDOW, grid_obj=self.grid, start=self.start, end=self.end)
+                    Algorithms.A_star(
+                        grid_obj=self.grid,
+                        start=self.start,
+                        end=self.end,
+                        visualize=True,
+                        screen=self.WINDOW
+                        #visualize=lambda: self.display_frame(screen=self.WINDOW)
+                    )
 
                 # C KEY DOWN  -> reset the grid
                 if event.key == pygame.K_c:
                     self.grid = Grid(window=self.WINDOW, rows=self.GRID_ROWS, width=self.GRID_WIDTH, random_maze=True)
-                    self.start = self.grid.Grid[0][1]
+                    self.start = self.grid.get_grid()[0][1]
                     self.start.make_start()
-                    self.end   = self.grid.Grid[-1][-2]
+                    self.end   = self.grid.get_grid()[-1][-2]
                     self.end.make_end()
 
         return True
