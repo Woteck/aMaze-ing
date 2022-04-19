@@ -1,6 +1,7 @@
 import pygame
 from app.colors import COLORS
 from app.algorithms import Algorithms
+from app.maze_generator import MAZE_GENERATOR
 from typing import Iterable, Tuple
 
 # --- Global constants ---
@@ -127,13 +128,19 @@ class Grid:
     :ivar pygame.Surface window: The pygame.Surface instance used as the window.
     :ivar int rows: The rows number of the Grid.
     :ivar int width: The width number of the pixel (from the window).
+    :ivar bool random_maze: Is the grid a random maze?.
+
     """
 
-    def __init__(self, window: pygame.Surface, rows: int, width: int):
+    def __init__(self, window: pygame.Surface, rows: int, width: int, random_maze: bool = False):
         self.window = window
         self.rows = rows
         self.width = width
-        self.Grid = self.make_grid(self.rows, self.width)
+
+        if random_maze:
+            self.Grid = self.make_random_grid(self.rows, self.width)
+        else:
+            self.Grid = self.make_grid(self.rows, self.width)
 
     def make_grid(self, rows: int, width: int) -> Iterable[Iterable[int]]:
         """
@@ -152,6 +159,29 @@ class Grid:
                 spot = Spot(row_pos=i, col_pos=j, width=gap, total_rows=rows)
                 grid[i].append(spot)
 
+        return grid
+
+    def make_random_grid(self, rows: int, width: int) -> Iterable[Iterable[int]]:
+        """
+            Returns a random maze as grid list according to rows and width.
+
+            :param rows: Number of rows.
+            :type  rows: int
+            :param width: Width number of pixel.
+            :type  width: int
+        """
+        mg = MAZE_GENERATOR(self.rows, self.rows)
+        maze = mg.create_maze()
+
+        grid = []
+        gap = width // rows
+        for i in range(rows):
+            grid.append([])
+            for j in range(rows):
+                spot = Spot(row_pos=i, col_pos=j, width=gap, total_rows=rows)
+                if maze[i][j] == MAZE_GENERATOR.MUR:
+                    spot.make_barrier()
+                grid[i].append(spot)
         return grid
 
     def get_spot(self, row: int, col: int) -> Spot:
@@ -232,11 +262,13 @@ class Interface:
         self.GRID_HEIGHT = height
         self.GRID_WIDTH = width
 
-        self.GRID_ROWS = 20
+        self.GRID_ROWS = 100
 
-        self.grid = Grid(window=self.WINDOW, rows=self.GRID_ROWS, width=self.GRID_WIDTH)
-        self.start = None
-        self.end   = None
+        self.grid = Grid(window=self.WINDOW, rows=self.GRID_ROWS, width=self.GRID_WIDTH, random_maze=True)
+        self.start = self.grid.Grid[0][1]
+        self.start.make_start()
+        self.end   = self.grid.Grid[-1][-2]
+        self.end.make_end()
 
     def process_events(self):
         """ 
@@ -288,9 +320,11 @@ class Interface:
 
                 # C KEY DOWN  -> reset the grid
                 if event.key == pygame.K_c:
-                    self.start = None
-                    self.end = None
-                    self.grid = Grid(window=self.WINDOW, rows=self.GRID_ROWS, width=self.GRID_WIDTH)
+                    self.grid = Grid(window=self.WINDOW, rows=self.GRID_ROWS, width=self.GRID_WIDTH, random_maze=True)
+                    self.start = self.grid.Grid[0][1]
+                    self.start.make_start()
+                    self.end   = self.grid.Grid[-1][-2]
+                    self.end.make_end()
 
         return True
 

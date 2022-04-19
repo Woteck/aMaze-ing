@@ -58,8 +58,8 @@ class Algorithms:
             if current != start:
                 current.make_closed()
             
-            screen.fill(COLORS.WHITE)
-            grid_obj.update()
-            pygame.display.update()
+            #screen.fill(COLORS.WHITE)
+            #grid_obj.update()
+            #pygame.display.update()
 
         return False
