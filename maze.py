@@ -2,9 +2,9 @@ from tkinter.tix import WINDOW
 import pygame
 from sympy import true
 from app.colors import COLORS
-from app.algorithms import Algorithms
+from app.algorithms import ALGORITHMS
 from app.maze_generator import MAZE_GENERATOR
-from typing import Iterable, Tuple
+from typing import List, Tuple
 
 # --- Global constants ---
 SCREEN_WIDTH = 700
@@ -74,7 +74,7 @@ class Spot:
     def draw(self, window: pygame.Surface):
         pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.width))
 
-    def update_neighbors(self, grid: Iterable[Iterable[int]]):
+    def update_neighbors(self, grid: List[List[int]]):
         """ Updates Spot neighbors and puts them in the list (up, down, right, left). """
     
         self.neighbors = []
@@ -119,7 +119,7 @@ class Grid:
         else:
             self.Grid = self.make_grid(self.rows, self.width)
 
-    def make_grid(self, rows: int, width: int) -> Iterable[Iterable[Spot]]:
+    def make_grid(self, rows: int, width: int) -> List[List[Spot]]:
         """
             Returns a grid list according to rows and width.
 
@@ -138,7 +138,7 @@ class Grid:
 
         return grid
 
-    def make_random_grid(self, rows: int, width: int) -> Iterable[Iterable[Spot]]:
+    def make_random_grid(self, rows: int, width: int) -> List[List[Spot]]:
         """
             Returns a random maze as grid list according to rows and width.
 
@@ -172,7 +172,7 @@ class Grid:
         """
         return self.Grid[row][col]
 
-    def get_all_spot(self) -> Iterable[Spot]:
+    def get_all_spot(self) -> List[Spot]:
         """ Returns all grid's spot. """
         all_spot = []
         for row in self.Grid:
@@ -207,7 +207,7 @@ class Grid:
         # returning spot from the grid row & col pos.
         return self.get_spot(row, col)
 
-    def get_grid(self) -> Iterable[Iterable[Spot]]:
+    def get_grid(self) -> List[List[Spot]]:
         return self.Grid
 
     def draw_grid(self):
@@ -242,7 +242,7 @@ class Interface:
         self.GRID_HEIGHT = height
         self.GRID_WIDTH = width
 
-        self.GRID_ROWS = 100
+        self.GRID_ROWS = 20
 
         self.grid = Grid(window=self.WINDOW, rows=self.GRID_ROWS, width=self.GRID_WIDTH, random_maze=True)
         self.start = self.grid.get_grid()[0][1]
@@ -296,13 +296,11 @@ class Interface:
                     for spot in self.grid.get_all_spot():
                         spot.update_neighbors(self.grid.get_grid())
 
-                    Algorithms.A_star(
+                    ALGORITHMS.A_star(
                         grid_obj=self.grid,
                         start=self.start,
                         end=self.end,
-                        visualize=True,
-                        screen=self.WINDOW
-                        #visualize=lambda: self.display_frame(screen=self.WINDOW)
+                        visualize=lambda: self.display_frame(screen=self.WINDOW)
                     )
 
                 # C KEY DOWN  -> reset the grid
