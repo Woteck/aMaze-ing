@@ -286,12 +286,24 @@ class Interface:
                     self.end = None
 
             if event.type == pygame.KEYDOWN:
-                # SPACE KEY DOWN  -> apply A* path finding algorithm
-                if event.key == pygame.K_SPACE and self.start and self.end:
+                # A KEY DOWN  -> apply A* path finding algorithm
+                if event.key == pygame.K_a and self.start and self.end:
                     for spot in self.grid.get_all_spot():
                         spot.update_neighbors(self.grid.get_grid())
 
                     ALGORITHMS.A_star(
+                        grid_obj=self.grid,
+                        start=self.start,
+                        end=self.end,
+                        visualize=lambda: self.display_frame(screen=self.WINDOW)
+                    )
+
+                # Z KEY DOWN  -> apply breadth first search algorithm
+                if event.key == pygame.K_z and self.start and self.end:
+                    for spot in self.grid.get_all_spot():
+                        spot.update_neighbors(self.grid.get_grid())
+
+                    ALGORITHMS.breadth_first_search(
                         grid_obj=self.grid,
                         start=self.start,
                         end=self.end,

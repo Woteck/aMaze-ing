@@ -1,6 +1,7 @@
 # algorithms.py
 
 from queue import PriorityQueue
+import queue
 from app.colors import COLORS
 
 class ALGORITHMS:
@@ -40,6 +41,7 @@ class ALGORITHMS:
 
             if current == end:
                 ALGORITHMS.reconstruct_path(came_from, end, **kwargs)
+                start.make_start()
                 end.make_end()
                 return True
 
@@ -65,5 +67,35 @@ class ALGORITHMS:
         return False
     
     @staticmethod
-    def breadth_first_search():
-        pass
+    def breadth_first_search(start, end, **kwargs):
+
+        visited_spots = [start]
+        queue = [start]
+        came_from = {}
+
+        while queue:
+            spot = queue.pop(0)
+
+            if spot == end:
+                ALGORITHMS.reconstruct_path(came_from, end, **kwargs)
+                start.make_start()
+                end.make_end()
+                return True
+
+            last_neighbour = spot
+            for neighbor in spot.neighbors:
+                if neighbor not in visited_spots:
+                    came_from[neighbor] = spot
+                    visited_spots.append(neighbor)
+                    queue.append(neighbor)
+                    if last_neighbour != neighbor:
+                        last_neighbour = neighbor
+                        neighbor.make_open()
+            
+            if spot != start:    
+                neighbor.make_closed()
+
+            if kwargs.get('visualize'):
+                kwargs.get('visualize')()
+
+        return False
