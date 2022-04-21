@@ -1,16 +1,11 @@
-from tkinter.tix import WINDOW
 import pygame
-from sympy import true
 from app.colors import COLORS
 from app.algorithms import ALGORITHMS
 from app.maze_generator import MAZE_GENERATOR
 from typing import List, Tuple
 
-# --- Global constants ---
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 700
-
-# --- Classes ---
 
 class Spot:
     """

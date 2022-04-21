@@ -25,7 +25,7 @@ class MAZE_GENERATOR:
             autour += 1
         return autour
 
-    def creat_murs(self, case, murs, pos):
+    def create_murs(self, case, murs, pos):
         """ fonction qui génère le labyrinthe """   
         c_autour = self.cheminsautour(case)
         if c_autour<2:
@@ -94,19 +94,19 @@ class MAZE_GENERATOR:
             #mur de gauche
             if rand_mur[1]!=0:
                 if (self.lab[rand_mur[0]][rand_mur[1]-1]=='n' and self.lab[rand_mur[0]][rand_mur[1]+1]=='c'):
-                    self.creat_murs(rand_mur, murs, MAZE_GENERATOR.GAUCHE)				
+                    self.create_murs(rand_mur, murs, MAZE_GENERATOR.GAUCHE)				
                     continue
             if rand_mur[0] != 0:
                 if (self.lab[rand_mur[0]-1][rand_mur[1]] == 'n' and self.lab[rand_mur[0]+1][rand_mur[1]] == 'c'):
-                    self.creat_murs(rand_mur, murs, MAZE_GENERATOR.HAUT)
+                    self.create_murs(rand_mur, murs, MAZE_GENERATOR.HAUT)
                     continue
             if (rand_mur[0] != self.HEIGHT-1):
                 if (self.lab[rand_mur[0]+1][rand_mur[1]] == 'n' and self.lab[rand_mur[0]-1][rand_mur[1]] == 'c'):
-                    self.creat_murs(rand_mur, murs, MAZE_GENERATOR.BAS)
+                    self.create_murs(rand_mur, murs, MAZE_GENERATOR.BAS)
                     continue
             if (rand_mur[1] != self.WIDTH-1):
                 if (self.lab[rand_mur[0]][rand_mur[1]+1] == 'n' and self.lab[rand_mur[0]][rand_mur[1]-1] == 'c'):
-                    self.creat_murs(rand_mur, murs, MAZE_GENERATOR.DROITE)
+                    self.create_murs(rand_mur, murs, MAZE_GENERATOR.DROITE)
                     continue
             for i in murs:
                 if i[0]==rand_mur[0] and i[1]==rand_mur[1]:

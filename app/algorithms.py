@@ -63,3 +63,7 @@ class ALGORITHMS:
                 kwargs.get('visualize')()
 
         return False
+    
+    @staticmethod
+    def breadth_first_search():
+        pass
