@@ -1,8 +1,6 @@
 # algorithms.py
 
 from queue import PriorityQueue
-import queue
-from app.colors import COLORS
 
 class ALGORITHMS:
     """ This class has a bunch of algorithms. """
@@ -82,18 +80,12 @@ class ALGORITHMS:
                 end.make_end()
                 return True
 
-            last_neighbour = spot
             for neighbor in spot.neighbors:
                 if neighbor not in visited_spots:
                     came_from[neighbor] = spot
                     visited_spots.append(neighbor)
                     queue.append(neighbor)
-                    if last_neighbour != neighbor:
-                        last_neighbour = neighbor
-                        neighbor.make_open()
-            
-            if spot != start:    
-                neighbor.make_closed()
+                    neighbor.make_closed()
 
             if kwargs.get('visualize'):
                 kwargs.get('visualize')()

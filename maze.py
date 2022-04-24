@@ -224,7 +224,7 @@ class Grid:
 
 class Interface:
     """
-    A class object representing the Spot.
+    A class object representing the Interface.
 
     :ivar pygame.Surface window: The pygame.Surface instance used as the window.
     :ivar int height: The window height.
@@ -317,6 +317,12 @@ class Interface:
                     self.start.make_start()
                     self.end   = self.grid.get_grid()[-1][-2]
                     self.end.make_end()
+
+                # V KEY DOWN  -> original grid
+                if event.key == pygame.K_v:
+                    for spot in self.grid.get_all_spot():
+                        if not (spot.is_start() or spot.is_end() or spot.is_barrier()):
+                            spot.reset()
 
         return True
 
