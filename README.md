@@ -8,7 +8,7 @@ Clique-gauche : Ajoute une barrière à la grille
 A : Application & visualisation de l'algorithme A*
 Z : Application & visualisation de l'algorithme Breadth First Search.
 C : Création d'un nouveau labyrinthe.
-V : Réinitialisation le labyrinthe.
+V : Réinitialisation du labyrinthe.
 ```
 
 ### Description
